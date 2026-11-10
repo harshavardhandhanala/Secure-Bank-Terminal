@@ -1,126 +1,170 @@
 # SecureBank Terminal
-### RFID and PIN-Based ATM Transaction Simulator with PC Database Integration
 
-SecureBank Terminal is an embedded-systems project that simulates basic ATM operations using an **ARM7 LPC2148 microcontroller**, an **RFID card reader**, a **4×4 matrix keypad**, a **16×2 LCD**, and a **Linux PC application**. The microcontroller handles the user interface and peripherals, while the PC application validates users, processes requests, maintains balances, and records transactions in text files.
+### RFID and PIN-Based ATM Transaction Simulator using LPC2148 and Linux C
 
-> **Project type:** Embedded Systems + UART Serial Communication + C/Linux  
-> **Main controller:** LPC2148 (ARM7TDMI-S)  
-> **Firmware IDE:** Keil µVision (project files are included)  
-> **PC software:** C program compiled with GCC on Linux
+SecureBank Terminal is an embedded systems project that simulates basic ATM operations using an **ARM7 LPC2148 microcontroller**, RFID reader, 4×4 keypad, 16×2 LCD, and a Linux-based PC application.
+
+The LPC2148 handles the hardware and user interface, while the Linux PC application manages user accounts, verifies PINs, processes transactions, and stores account details in text files.
+
+### Project Information
+
+| Category | Details |
+|---|---|
+| Project Name | SecureBank Terminal |
+| Project Type | Embedded Systems |
+| Microcontroller | ARM7 LPC2148 |
+| Programming Language | Embedded C and Linux C |
+| Firmware IDE | Keil µVision |
+| Simulation | Proteus |
+| PC Application | Linux |
+| Communication | UART0 and UART1 |
+| Database | Text File Handling |
 
 ---
 
 ## Contents
-- [Features](#features)
-- [System Architecture](#system-architecture)
-- [Hardware and Peripherals](#hardware-and-peripherals)
-- [Pin Connections](#pin-connections)
-- [How It Works](#how-it-works)
-- [Menu and Keypad Operation](#menu-and-keypad-operation)
-- [Serial Communication Protocol](#serial-communication-protocol)
-- [Project Structure](#project-structure)
-- [Setup and Running](#setup-and-running)
-- [User Database Format](#user-database-format)
-- [Transaction Log](#transaction-log)
-- [Troubleshooting](#troubleshooting)
-- [Limitations and Security Note](#limitations-and-security-note)
 
-## Features
+1. Features
+2. System Architecture
+3. Hardware Requirements
+4. Pin Connections
+5. Working Process
+6. Menu and Keypad Operations
+7. UART Communication Protocol
+8. Project Folder Structure
+9. Setup and Execution
+10. User Database Format
+11. Transaction History
+12. Troubleshooting
+13. Limitations
+14. Learning Outcomes
+15. Author
 
-- RFID card detection and card-ID transfer to the PC.
-- PIN verification before access to ATM operations.
-- PIN input masking on the LCD (entered digits appear as `*`, where the masked input routine is used).
+---
+
+## 1. Features
+
+- RFID card detection and identification.
+- PIN-based user authentication.
+- Masked PIN entry on the LCD.
 - Account balance inquiry.
 - Cash deposit simulation.
-- Cash withdrawal simulation with balance validation.
-- Three consecutive incorrect PIN attempts can block an account, according to the PC-side account-status logic.
-- Account active/blocked status stored in the user database.
-- Mini-statement showing recent transactions.
-- PIN-change request/flow in the firmware.
-- 16×2 LCD menus and keypad navigation.
-- UART communication between the microcontroller and the PC.
-- Persistent account records and transaction history using text files.
+- Cash withdrawal with balance checking.
+- Account blocking after three incorrect PIN attempts.
+- Active and blocked account management.
+- Mini-statement to view recent transactions.
+- PIN change functionality.
+- 16×2 LCD display for messages and menus.
+- 4×4 keypad for user input.
+- UART communication between LPC2148 and Linux PC.
+- User account management using text files.
+- Transaction history storage.
 
-**Important:** This is an educational ATM simulator. It does not connect to a real bank, dispense physical cash, or provide production-grade banking security.
+**Note:** This project is developed for educational purposes. It does not connect to a real bank or dispense physical cash.
 
-## System Architecture
+---
+
+## 2. System Architecture
+
+The project has two main parts:
+
+1. **Embedded System:** LPC2148 handles RFID reading, keypad input, LCD display, and ATM operations.
+2. **PC Application:** Linux C program handles account verification, PIN validation, balance updates, and transaction records.
+
+### Block Diagram
 
 ```text
-        RFID Card
-            |
-            v
-      RFID Reader
-            |
-       UART1 (TTL)
-            |
-            v
-   +-------------------+
-   | LPC2148 / ARM7    |
-   |                   |
-   | 4x4 Keypad        |
-   | 16x2 LCD          |
-   | ATM state/menu    |
-   +-------------------+
-            |
-       UART0 (TTL)
-            |
-      MAX232 / USB-UART
-            |
-            v
-   +-------------------+
-   | Linux PC program  |
-   | pc_main.c         |
-   |                   |
-   | users.txt         |
-   | transactions.txt  |
-   +-------------------+
+          RFID Card
+              |
+              v
+         RFID Reader
+              |
+           UART1
+              |
+              v
+     +-------------------+
+     |      LPC2148      |
+     |                   |
+     |   4x4 Keypad      |
+     |   16x2 LCD        |
+     |   ATM Control     |
+     +-------------------+
+              |
+           UART0
+              |
+       MAX232 / USB-TTL
+              |
+              v
+     +-------------------+
+     |     Linux PC      |
+     |                   |
+     |    pc_main.c      |
+     |                   |
+     |    users.txt      |
+     | transactions.txt  |
+     +-------------------+
 ```
 
-The LPC2148 firmware reads the card, collects keypad input, and displays messages. It sends protocol requests over UART0 to the Linux program. The Linux program checks the card/PIN and account status, processes transactions, updates `users.txt`, and appends transaction records to `transactions.txt`. It sends a response back to the microcontroller for display.
+### Working of the Architecture
 
-## Hardware and Peripherals
+- RFID reader sends the card ID to LPC2148 through UART1.
+- LPC2148 sends the card ID to the Linux PC through UART0.
+- Linux checks the card details in `users.txt`.
+- The user enters the PIN using the keypad.
+- The PC verifies the PIN and account status.
+- The user selects an ATM operation.
+- Linux processes the request and updates the database.
+- The result is sent back to LPC2148 and displayed on the LCD.
+
+---
+
+## 3. Hardware Requirements
 
 | Component | Purpose |
 |---|---|
-| LPC2148 development board | Runs the embedded firmware and controls peripherals |
-| RFID reader and RFID card/tag | Reads the card identifier used to select an account |
-| 4×4 matrix keypad | PIN entry, amount entry, and menu selection |
-| 16×2 character LCD (HD44780-compatible) | Displays prompts, menus, balances, and transaction results |
-| MAX232 level converter (if using a true RS-232 PC serial port) | Converts MCU UART logic-level signals to/from RS-232 voltage levels |
-| USB-to-TTL UART adapter (alternative PC connection) | Connects UART logic levels directly to a PC USB port |
-| Linux PC/laptop | Runs the account/database and transaction-handling program |
-| Jumper wires and suitable power supply | Hardware interconnections and power |
+| LPC2148 | Main microcontroller |
+| RFID Reader | Reads RFID card number |
+| RFID Card | Identifies the user |
+| 4×4 Keypad | PIN and transaction input |
+| 16×2 LCD | Displays ATM messages |
+| MAX232 | Converts UART and RS-232 voltage levels |
+| USB-to-TTL Adapter | Connects MCU UART to PC |
+| Linux PC | Runs the banking application |
+| Jumper Wires | Hardware connections |
+| Power Supply | Provides required power |
 
-### MAX232: where it is used
+### MAX232 Connection
 
-The LPC2148 UART pins use **logic-level UART signals**. A traditional RS-232 serial port uses different voltage levels and polarity, so a **MAX232 is placed between the MCU UART and an RS-232 interface**. Do not connect an RS-232 voltage-level signal directly to an LPC2148 UART pin.
+LPC2148 uses TTL-level UART communication, whereas traditional RS-232 ports use different voltage levels.
 
-If a USB-to-TTL UART adapter is used, connect its logic-level TX/RX/GND appropriately; a MAX232 is generally not needed between the adapter and the MCU. Confirm the voltage level supported by the adapter and board before connecting.
+- Use MAX232 when connecting to a traditional RS-232 interface.
+- Use a USB-to-TTL adapter when connecting directly to a PC USB port.
+- A MAX232 is generally not required with a compatible USB-to-TTL adapter.
+- Always check voltage compatibility before connecting.
 
-## Pin Connections
+---
 
-The following pin assignments are taken from the project source definitions. Confirm the exact pin mapping and board wiring before powering the circuit.
+## 4. Pin Connections
 
-### 1. 16×2 LCD — 8-bit interface
+The following connections are based on the project source code. Verify them with your actual circuit before connecting the hardware.
 
-The LCD driver writes the data byte to `IOPIN0` starting at bit 16. The control-pin definitions are in `mcu/lcd_defines.h`.
+### 4.1 LCD Connections (16×2, 8-bit Mode)
 
-| LCD signal | LPC2148 pin | Project definition |
-|---|---|---|
-| D0–D7 | P0.16–P0.23 | `LCD_DATA 16` (8-bit data bus) |
-| RS | P0.5 | `LCD_RS 5` |
-| R/W | P0.6 | `LCD_RW 6` |
-| Enable (E) | P0.4 | `LCD_EN 4` |
-| VSS / VDD | GND / suitable supply | Follow the LCD module specification |
-| V0 / contrast | Contrast circuit/potentiometer | Adjust for readable text |
+| LCD Pin | LPC2148 Pin |
+|---|---|
+| D0–D7 | P0.16–P0.23 |
+| RS | P0.5 |
+| RW | P0.6 |
+| Enable | P0.4 |
+| VSS | GND |
+| VDD | Suitable supply |
+| V0 | Contrast adjustment |
 
-**Note:** Some comments in the source beside the LCD definitions do not consistently describe the pin numbers. The numeric macros and driver operations are the better reference; verify them against your physical circuit.
+The LCD uses an 8-bit data interface.
 
-### 2. 4×4 Matrix Keypad
+### 4.2 Keypad Connections (4×4)
 
-The keypad uses Port 1 pins, as defined in `mcu/KPM_defines.h`.
-
-| Keypad lines | LPC2148 pins |
+| Keypad Line | LPC2148 Pin |
 |---|---|
 | Row 0 | P1.16 |
 | Row 1 | P1.17 |
@@ -131,263 +175,452 @@ The keypad uses Port 1 pins, as defined in `mcu/KPM_defines.h`.
 | Column 2 | P1.22 |
 | Column 3 | P1.23 |
 
-The key lookup table in `mcu/KPM.c` is:
+**Keypad Layout:**
 
 ```text
-1  2  3  A
-4  5  6  B
-7  8  9  *
-C  0  =  E
+  1    2    3    A
+  4    5    6    B
+  7    8    9    *
+  C    0    =    E
 ```
 
-The firmware uses numeric keys for PIN/amount input and the configured control keys for backspace, confirmation, and exit. The exact action depends on the current screen.
+The numeric keys are used for PIN and amount entry. Other keys perform control operations such as backspace, confirmation, and exit.
 
-### 3. UART0 — LPC2148 to Linux PC
+### 4.3 UART0 Connections (LPC2148 to PC)
 
-UART0 is used by the firmware to send ATM requests and receive PC responses.
+UART0 is used for communication between the microcontroller and Linux PC.
 
-| Signal | LPC2148 pin | Connection |
-|---|---|---|
-| TXD0 | P0.0 | Connect to the other interface's RX |
-| RXD0 | P0.1 | Connect to the other interface's TX |
-| GND | GND | Common ground |
+| Signal | LPC2148 Pin |
+|---|---|
+| TXD0 | P0.0 |
+| RXD0 | P0.1 |
+| GND | GND |
 
-The firmware selects UART0 using `PINSEL0` and sets a baud-rate divisor in `mcu/uart0_pc.c`. The PC application is configured for **9600 baud, 8 data bits, no parity, 1 stop bit (8-N-1)**. The divisor value must match the LPC2148 peripheral clock configuration; verify it for your board.
+Connect TX to RX and RX to TX between the two devices.
 
-### 4. UART1 — RFID reader to LPC2148
+**Communication Settings:**
 
-The RFID interface is implemented in `mcu/rfid_uart1.c`.
+- Baud Rate: 9600
+- Data Bits: 8
+- Parity: None
+- Stop Bits: 1
+- Format: 8-N-1
 
-| Signal | LPC2148 pin used by the source | Connection |
-|---|---|---|
-| TXD1 | P0.8 | Connect to RFID reader TX/RX as required by the reader's UART interface |
-| RXD1 | P0.9 | Connect to the opposite UART data direction |
-| GND | GND | Common ground |
+The baud-rate divisor must match the LPC2148 peripheral clock configuration.
 
-UART communication is crossed: **reader TX → MCU RXD1**, and **reader RX → MCU TXD1** only if the reader needs commands from the MCU. For a reader that only transmits card IDs, TX → RX and GND may be sufficient. Confirm the reader's datasheet and output format. The firmware expects a framed card value and validates an 8-digit identifier; a reader with a different output format may require code changes.
+### 4.4 UART1 Connections (RFID Reader)
 
-### 5. Connections overview
+UART1 is used to receive RFID card information.
 
-- Connect all grounds together where the interfaces require a common reference.
-- Cross TX and RX between UART devices.
-- Do not connect two TX outputs together.
-- Check the LPC2148 board's pin multiplexing, voltage levels, and peripheral clock before testing.
-- The source code is the reference for the current pin definitions; this README cannot verify undocumented physical wiring.
+| Signal | LPC2148 Pin |
+|---|---|
+| TXD1 | P0.8 |
+| RXD1 | P0.9 |
+| GND | GND |
 
-## How It Works
+**Connections:**
 
-1. **Idle / card scan:** The firmware waits for the RFID reader to provide a card ID.
-2. **Card verification:** The card ID is sent to the Linux program. The PC checks whether the card exists and whether its account is active.
-3. **PIN entry:** If the card is accepted, the LCD prompts for a PIN. The firmware sends the card ID and entered PIN to the PC.
-4. **Authentication:** The PC validates the PIN and account status. The user proceeds to the menu only after a successful response.
-5. **Operation selection:** The user chooses balance, deposit, withdrawal, mini-statement, or PIN-change functions from the keypad.
-6. **Request processing:** The MCU sends the selected operation and any amount to the PC application.
-7. **Database update:** The PC validates the request, updates the account balance where needed, saves account data, and records deposit/withdrawal activity.
-8. **Result display:** The PC response is sent back to the MCU, and the LCD shows the result.
-9. **Exit:** The user can return to the menu or end the session and return to the card-scan screen, according to the firmware's current key handling.
+- RFID TX → LPC2148 RXD1 (P0.9).
+- RFID RX → LPC2148 TXD1 (P0.8), if required by the reader.
+- RFID GND → Common GND.
 
-## Menu and Keypad Operation
+The firmware expects a framed card ID containing an 8-digit identifier. Different RFID readers may require changes to the receiving code.
 
-The firmware's menu is divided into two pages.
+### Important Connection Notes
+
+- Connect common grounds where required.
+- Always cross TX and RX connections.
+- Never connect two TX pins together.
+- Verify the voltage levels of all devices.
+- Check the LPC2148 pin configuration and peripheral clock.
+
+---
+
+## 5. Working Process
+
+The ATM system works in the following steps:
+
+**Step 1: Start the System**
+
+The LCD displays the project title and waits for an RFID card.
+
+**Step 2: RFID Card Detection**
+
+The RFID reader reads the card number and sends it to LPC2148 through UART1.
+
+**Step 3: Card Verification**
+
+LPC2148 sends the card number to the Linux PC through UART0. The PC checks whether the card exists and whether the account is active.
+
+**Step 4: PIN Entry**
+
+If the card is valid, the LCD asks the user to enter the PIN using the keypad. The entered digits are masked on the LCD.
+
+**Step 5: PIN Authentication**
+
+The Linux application checks the entered PIN.
+
+If the PIN is correct, the user can access the ATM menu. Incorrect PIN attempts are counted, and the account can be blocked after three consecutive failures.
+
+**Step 6: Select ATM Operation**
+
+The user can select:
+
+- Balance Inquiry
+- Deposit
+- Withdrawal
+- Mini-Statement
+- PIN Change
+
+**Step 7: Process Transaction**
+
+The Linux PC processes the selected operation and updates the account balance when required.
+
+**Step 8: Display Result**
+
+The PC sends the result to LPC2148. The LCD displays the transaction result.
+
+**Step 9: Exit**
+
+The user can exit the session and return to the RFID card scanning screen.
+
+---
+
+## 6. Menu and Keypad Operations
+
+The ATM menu contains two pages.
 
 | Key | Operation |
 |---|---|
-| `1` | Balance inquiry |
-| `2` | Deposit |
-| `3` | Withdrawal |
-| `4` | Next menu page / back to previous page |
-| `5` | Mini-statement (second page) |
-| `6` | PIN change (second page) |
-| `*` | Exit session / return to card scanning, depending on screen |
-| `B` | Backspace during numeric entry |
-| `E` | Confirm numeric input or use the screen's configured exit action |
+| 1 | Balance Inquiry |
+| 2 | Deposit |
+| 3 | Withdrawal |
+| 4 | Next Menu / Previous Menu |
+| 5 | Mini-Statement |
+| 6 | PIN Change |
+| * | Exit Session |
+| B | Backspace |
+| E | Confirm Input / Screen-specific Exit |
 
-The exact behavior of `E` and `*` is screen-dependent. If your physical keypad labels differ from the lookup table in `KPM.c`, update the lookup table or wiring accordingly.
+The exact function of the control keys depends on the current LCD screen and firmware implementation.
 
-## Serial Communication Protocol
+---
 
-The firmware and PC program exchange text messages over UART0. Messages use `$` as the end marker.
+## 7. UART Communication Protocol
 
-### MCU → PC examples
+UART0 is used to exchange messages between LPC2148 and the Linux PC.
+
+The messages use `$` as the end marker.
+
+### MCU to PC Messages
+
+**1. RFID Card Number**
 
 ```text
 #CARD:12535708$
+```
+
+**2. Card Number and PIN**
+
+```text
 #CARD:12535708#PIN:1234$
+```
+
+**3. Balance Inquiry**
+
+```text
 #TXN:BALANCE#REQ$
+```
+
+**4. Deposit Request**
+
+```text
 #TXN:DEPOSIT#AMOUNT:100$
+```
+
+**5. Withdrawal Request**
+
+```text
 #TXN:WITHDRAW#AMOUNT:200$
 ```
 
-### PC → MCU examples
+### PC to MCU Responses
+
+**1. Successful Response**
 
 ```text
 @OK$
+```
+
+**2. Invalid Card**
+
+```text
 @ERR#INVALID_CARD$
+```
+
+**3. Invalid PIN**
+
+```text
 @ERR#INVALID_PIN$
+```
+
+**4. Balance Information**
+
+```text
 @OK#BALANCE:7500.00$
 ```
 
-These are protocol examples to illustrate the message format; actual response strings and operation fields should be checked in `mcu/demo.c` / `mcu/demo_fixed.c` and `linux/pc_main.c`, because those files may differ between firmware versions. Both sides must use the same message format and terminator or communication can time out or fail.
+These are example messages. The actual message format must match the selected MCU firmware and Linux PC application.
 
-## Project Structure
+Both programs must use the same message format and end marker.
+
+---
+
+## 8. Project Folder Structure
 
 ```text
 ARM_majorproject/
+│
 ├── linux/
-│   ├── pc_main.c          # PC-side ATM/account and transaction logic
-│   ├── uart.c              # Linux serial-port helper functions
-│   ├── uart.h              # UART helper declarations
-│   ├── users.txt           # Demo account records
-│   └── transactions.txt    # Transaction history/log
+│   ├── pc_main.c
+│   ├── uart.c
+│   ├── uart.h
+│   ├── users.txt
+│   └── transactions.txt
 │
 └── mcu/
-    ├── main.c              # MCU application/state-machine source
-    ├── demo.c              # Firmware variant
-    ├── demo_fixed.c        # Updated firmware variant
-    ├── rfid_uart1.c        # RFID reader UART1 driver/interrupt
-    ├── uart0_pc.c          # UART0 PC communication functions
+    ├── main.c
+    ├── demo.c
+    ├── demo_fixed.c
+    ├── rfid_uart1.c
+    ├── uart0_pc.c
     ├── uart0_pc.h
-    ├── KPM.c               # Keypad driver and numeric input
+    ├── KPM.c
     ├── KPM.h
-    ├── KPM_defines.h       # Keypad pin definitions
-    ├── lcd.c               # LCD driver
+    ├── KPM_defines.h
+    ├── lcd.c
     ├── lcd.h
-    ├── lcd_defines.h       # LCD pin/command definitions
+    ├── lcd_defines.h
     ├── delay.c
     ├── delay.h
     ├── define.h
     ├── types.h
-    ├── Startup.s           # Startup code
-    └── project.uvproj      # Keil µVision project
+    ├── Startup.s
+    └── project.uvproj
 ```
 
-The archive may also include generated build files (`.hex`, `.axf`, `.o`, `.map`, `.dep`, `.crf`, `.lst`, `.htm`, `.plg`) and IDE backup files. These are build artifacts, not all required for understanding the source. The source files listed above are the main files to read first.
+### Important Files
 
-## Setup and Running
+| File | Description |
+|---|---|
+| `pc_main.c` | Linux ATM application |
+| `uart.c` | Linux serial communication |
+| `users.txt` | User account details |
+| `transactions.txt` | Transaction history |
+| `main.c` | LPC2148 application |
+| `rfid_uart1.c` | RFID communication |
+| `uart0_pc.c` | PC communication |
+| `KPM.c` | Keypad driver |
+| `lcd.c` | LCD driver |
+| `delay.c` | Delay functions |
+| `project.uvproj` | Keil project file |
+| `Startup.s` | LPC2148 startup code |
 
-### A. Build and run the Linux PC application
+The project may also contain generated files such as `.hex`, `.axf`, `.o`, `.map`, `.dep`, `.crf`, `.lst`, `.htm`, and `.plg`. These are mainly build and IDE files.
 
-1. Use a Linux machine (or a Linux environment with access to the serial device).
-2. Connect the LPC2148 UART0 through a compatible USB-to-TTL adapter or MAX232 plus a compatible serial interface.
-3. Find the serial device, for example:
+**Note:** `main.c`, `demo.c`, and `demo_fixed.c` contain different firmware versions. Select only the intended application version when building the project.
 
-   ```bash
-   ls /dev/ttyUSB*
-   ls /dev/ttyACM*
-   ```
+---
 
-4. Open a terminal in the `linux` directory:
+## 9. Setup and Execution
 
-   ```bash
-   cd ARM_majorproject/linux
-   gcc pc_main.c uart.c -o pc_main
-   ```
+### A. Linux PC Application
 
-5. Run the program with the actual serial-device path:
+**Requirements:**
 
-   ```bash
-   ./pc_main /dev/ttyUSB0
-   ```
+- Linux operating system
+- GCC compiler
+- UART serial connection
 
-   Replace `/dev/ttyUSB0` with the correct device on your computer. If permission is denied, check your Linux serial-port permissions and group membership.
+**Step 1: Check the serial device**
 
-6. Keep `users.txt` in the program's working directory because the program opens it by filename. The same applies to `transactions.txt`.
+```bash
+ls /dev/ttyUSB*
+ls /dev/ttyACM*
+```
 
-### B. Build and flash the LPC2148 firmware
+**Step 2: Open the Linux project directory**
 
-1. Open `mcu/project.uvproj` in Keil µVision with a compatible ARM7/LPC2148 toolchain and device support installed.
-2. Review the project target and startup settings.
-3. Confirm the selected application source. The archive contains multiple firmware variants (`main.c`, `demo.c`, and `demo_fixed.c`); **do not compile multiple files that each define the same application entry point**. Select the intended version and ensure its required driver files are included.
-4. Build the project and resolve compiler/linker errors.
-5. Program the resulting firmware onto the LPC2148 board using a compatible programmer/ISP workflow.
-6. Verify the RFID reader, keypad, LCD, UART wiring, baud rate, and clock configuration.
-7. Start the Linux PC program, then power/reset the MCU and test with a demo card.
+```bash
+cd ARM_majorproject/linux
+```
 
-**Build note:** This README documents the supplied source layout; it does not claim that every firmware variant builds without modification. Select and test one matching MCU firmware version and PC protocol version together.
+**Step 3: Compile the program**
 
-## User Database Format
+```bash
+gcc pc_main.c uart.c -o pc_main
+```
 
-The PC application reads `users.txt`. Each record is one line with fields separated by `|`:
+**Step 4: Run the application**
+
+```bash
+./pc_main /dev/ttyUSB0
+```
+
+Replace `/dev/ttyUSB0` with your actual serial device.
+
+**Step 5: Check database files**
+
+Make sure `users.txt` and `transactions.txt` are available in the working directory.
+
+If you get a permission error, check the Linux serial-port permissions and user group membership.
+
+### B. LPC2148 Firmware using Keil µVision
+
+**Step 1:** Open `project.uvproj` in Keil µVision.
+
+**Step 2:** Check the LPC2148 device and project settings.
+
+**Step 3:** Select the required firmware version (`main.c`, `demo.c`, or `demo_fixed.c`).
+
+**Step 4:** Include the required LCD, keypad, UART, RFID, and delay driver files.
+
+**Step 5:** Build the project and resolve any compiler or linker errors.
+
+**Step 6:** Generate the firmware output file.
+
+**Step 7:** Program the firmware onto the LPC2148 board using a compatible programmer or ISP method.
+
+**Step 8:** Verify the hardware connections, baud rate, and clock settings.
+
+**Step 9:** Start the Linux PC application and then reset the microcontroller.
+
+**Step 10:** Scan an RFID card and test the ATM operations.
+
+### Proteus Simulation
+
+The project can also be tested using Proteus simulation.
+
+Check the LCD, keypad, RFID UART input, and UART0 communication connections. For PC communication, configure a suitable virtual serial-port or PTY bridge between Proteus and the Linux application.
+
+---
+
+## 10. User Database Format
+
+The Linux application stores user details in `users.txt`.
+
+Each user record contains six fields separated by `|`.
+
+**Format:**
 
 ```text
 CARD_ID|PIN|NAME|BALANCE|STATUS|FAILED_ATTEMPTS
 ```
 
-Example format:
+**Example:**
 
 ```text
 12535708|1234|Demo User|7500.00|ACTIVE|0
 87654321|6789|Test User|2500.50|ACTIVE|0
 ```
 
-Field meanings:
+### Field Description
 
 | Field | Description |
 |---|---|
-| `CARD_ID` | RFID card identifier |
-| `PIN` | Demo PIN |
-| `NAME` | Account holder's display name |
-| `BALANCE` | Account balance used by the simulator |
-| `STATUS` | Account status such as `ACTIVE` or `BLOCKED` |
-| `FAILED_ATTEMPTS` | Failed PIN attempt counter |
+| CARD_ID | RFID card number |
+| PIN | User PIN |
+| NAME | Account holder name |
+| BALANCE | Available account balance |
+| STATUS | ACTIVE or BLOCKED |
+| FAILED_ATTEMPTS | Incorrect PIN attempt count |
 
-These are **demo credentials only**. Change the sample values before sharing the repository publicly if they represent real people or real credentials. Do not store real banking PINs or sensitive account data in this file.
+The PC application reads these records to authenticate users and manage accounts.
 
-## Transaction Log
+**Security Note:** These are sample credentials for demonstration. Do not use real banking PINs or personal account information.
 
-The PC application appends transaction records to `transactions.txt`. The basic record format is:
+---
+
+## 11. Transaction History
+
+The application stores deposit and withdrawal records in `transactions.txt`.
+
+**Format:**
 
 ```text
 CARD_ID|TRANSACTION_TYPE|AMOUNT
 ```
 
-Example:
+**Example:**
 
 ```text
 12535708|Deposit|100.00
 12535708|Withdraw|200.00
 ```
 
-The mini-statement reads transaction records and displays recent activity for the currently authenticated card. The precise ordering and supported transaction types depend on the current `pc_main.c` implementation.
+The program appends new transaction records to the file.
 
-## Troubleshooting
+The mini-statement feature reads the transaction history and displays recent transactions for the authenticated user.
 
-| Problem | Things to check |
+The exact transaction order and supported transaction types depend on the Linux application implementation.
+
+---
+
+## 12. Troubleshooting
+
+| Problem | Possible Solution |
 |---|---|
-| PC program says the serial device cannot be opened | Confirm the device path, adapter connection, permissions, and that another program is not using the port |
-| LCD shows “PC not responding” | Start `pc_main` first; check UART0 TX/RX crossover, common ground, baud rate, clock/divisor, and `$` message terminators |
-| RFID card is not detected | Confirm reader power, UART1 RX/TX mapping, reader baud rate, card-ID format, and interrupt configuration |
-| Card is detected but rejected | Check the exact card ID in `users.txt`, including leading zeros and whitespace |
-| PIN always fails | Verify the PIN field, keypad layout, request format, and that MCU and PC firmware versions agree |
-| Keypad keys are incorrect | Check row/column wiring and the `KPMLUT` lookup table in `KPM.c` |
-| LCD text is garbled or missing | Check LCD data/control wiring, contrast, initialization, and power |
-| Transactions are not saved | Run the program from the directory containing `users.txt`, check write permissions, and inspect `transactions.txt` |
-| Build has duplicate-symbol errors | Ensure only one application file (`main.c`, `demo.c`, or `demo_fixed.c`) defines the selected main logic |
+| Serial port cannot open | Check the device path and permissions |
+| LCD displays incorrect text | Check LCD connections, contrast, and initialization |
+| PC not responding | Check UART0 TX/RX, baud rate, and serial connection |
+| RFID card not detected | Check RFID power, UART1 connections, and baud rate |
+| Card rejected | Verify the card ID in `users.txt` |
+| PIN always incorrect | Check the PIN in the database and keypad input |
+| Keypad keys incorrect | Check row/column connections and lookup table |
+| Transactions not saved | Check file permissions and working directory |
+| Multiple definition errors | Select only one firmware application file |
+| UART communication fails | Check clock configuration and message terminators |
 
-## Limitations and Security Note
+---
 
-- This project is intended for academic demonstration and learning.
-- The database is stored in plain-text files, and demo PINs are not securely protected.
-- UART messages are not encrypted or authenticated.
-- The program is not connected to a real banking network and must not be used for real financial transactions.
-- Before publishing on GitHub, remove real personal information, credentials, local build outputs if not needed, and any private configuration.
-- Hardware pin assignments and clock-dependent baud-rate divisors must be verified against the exact board and wiring.
+## 13. Limitations and Security
 
-## Learning Outcomes
+- This project is developed for educational and demonstration purposes.
+- It does not connect to real banking servers.
+- It does not dispense physical cash.
+- User information is stored in plain-text files.
+- PINs are not encrypted.
+- UART communication is not encrypted or authenticated.
+- Hardware connections and baud-rate settings must be verified.
+- The system should not be used for real financial transactions.
 
-This project demonstrates practical use of:
-- ARM7/LPC2148 microcontroller programming in C.
-- GPIO and peripheral pin multiplexing.
-- UART serial communication and message framing.
-- UART receive interrupts for RFID input.
-- LCD and matrix-keypad interfacing.
-- Embedded state-machine design.
-- Linux serial-port programming in C.
-- File-based record persistence and transaction logging.
-- Debugging communication between embedded firmware and a PC application.
+---
 
-## Author
+## 14. Learning Outcomes
+
+Through this project, I gained practical experience in:
+
+- ARM7 LPC2148 microcontroller programming.
+- Embedded C programming.
+- GPIO and peripheral interfacing.
+- UART serial communication.
+- UART receive interrupts.
+- RFID reader interfacing.
+- LCD and matrix keypad interfacing.
+- Embedded application development.
+- Linux system programming using C.
+- Serial-port communication in Linux.
+- File handling and database management.
+- Linked lists and data structures.
+- ATM transaction processing.
+- Hardware and software debugging.
+- Communication between an embedded system and a PC application.
+
+---
+
+## 15. Author
 
 **Atish Vijay Udawant**
 
-For academic demonstration and portfolio use. Update this section with your GitHub profile, project video, circuit diagram, or hardware photographs if available.# Secure-Bank-Terminal
+This project was developed as an academic embedded systems project to understand microcontroller programming, serial communication, Linux C programming, and hardware-software integration.
+
