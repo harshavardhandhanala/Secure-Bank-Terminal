@@ -20,27 +20,7 @@ The LPC2148 handles the hardware and user interface, while the Linux PC applicat
 | Communication | UART0 and UART1 |
 | Database | Text File Handling |
 
----
 
-## Contents
-
-1. Features
-2. System Architecture
-3. Hardware Requirements
-4. Pin Connections
-5. Working Process
-6. Menu and Keypad Operations
-7. UART Communication Protocol
-8. Project Folder Structure
-9. Setup and Execution
-10. User Database Format
-11. Transaction History
-12. Troubleshooting
-13. Limitations
-14. Learning Outcomes
-15. Author
-
----
 
 ## 1. Features
 
@@ -367,7 +347,7 @@ Both programs must use the same message format and end marker.
 ## 8. Project Folder Structure
 
 ```text
-ARM_majorproject/
+SecureBankTerminal/
 │
 ├── linux/
 │   ├── pc_main.c
@@ -378,8 +358,6 @@ ARM_majorproject/
 │
 └── mcu/
     ├── main.c
-    ├── demo.c
-    ├── demo_fixed.c
     ├── rfid_uart1.c
     ├── uart0_pc.c
     ├── uart0_pc.h
@@ -393,32 +371,10 @@ ARM_majorproject/
     ├── delay.h
     ├── define.h
     ├── types.h
-    ├── Startup.s
-    └── project.uvproj
+    └── Startup.s
 ```
 
-### Important Files
 
-| File | Description |
-|---|---|
-| `pc_main.c` | Linux ATM application |
-| `uart.c` | Linux serial communication |
-| `users.txt` | User account details |
-| `transactions.txt` | Transaction history |
-| `main.c` | LPC2148 application |
-| `rfid_uart1.c` | RFID communication |
-| `uart0_pc.c` | PC communication |
-| `KPM.c` | Keypad driver |
-| `lcd.c` | LCD driver |
-| `delay.c` | Delay functions |
-| `project.uvproj` | Keil project file |
-| `Startup.s` | LPC2148 startup code |
-
-The project may also contain generated files such as `.hex`, `.axf`, `.o`, `.map`, `.dep`, `.crf`, `.lst`, `.htm`, and `.plg`. These are mainly build and IDE files.
-
-**Note:** `main.c`, `demo.c`, and `demo_fixed.c` contain different firmware versions. Select only the intended application version when building the project.
-
----
 
 ## 9. Setup and Execution
 
@@ -432,65 +388,25 @@ The project may also contain generated files such as `.hex`, `.axf`, `.o`, `.map
 
 **Step 1: Check the serial device**
 
-```bash
-ls /dev/ttyUSB*
-```
+
 
 **Step 2: Open the Linux project directory**
 
-```bash
-cd ARM_majorproject/linux
-```
+
 
 **Step 3: Compile the program**
 
-```bash
-gcc pc_main.c uart.c -o pc_main
-```
+
 
 **Step 4: Run the application**
 
-```bash
-./pc_main /dev/ttyUSB0
-```
-
-Replace `/dev/ttyUSB0` with your actual serial device.
 
 **Step 5: Check database files**
 
 Make sure `users.txt` and `transactions.txt` are available in the working directory.
 
-If you get a permission error, check the Linux serial-port permissions and user group membership.
 
-### B. LPC2148 Firmware using Keil µVision
 
-**Step 1:** Open `project.uvproj` in Keil µVision.
-
-**Step 2:** Check the LPC2148 device and project settings.
-
-**Step 3:** Select the required firmware version (`main.c`, `demo.c`, or `demo_fixed.c`).
-
-**Step 4:** Include the required LCD, keypad, UART, RFID, and delay driver files.
-
-**Step 5:** Build the project and resolve any compiler or linker errors.
-
-**Step 6:** Generate the firmware output file.
-
-**Step 7:** Program the firmware onto the LPC2148 board using a compatible programmer or ISP method.
-
-**Step 8:** Verify the hardware connections, baud rate, and clock settings.
-
-**Step 9:** Start the Linux PC application and then reset the microcontroller.
-
-**Step 10:** Scan an RFID card and test the ATM operations.
-
-### Proteus Simulation
-
-The project can also be tested using Proteus simulation.
-
-Check the LCD, keypad, RFID UART input, and UART0 communication connections. For PC communication, configure a suitable virtual serial-port or PTY bridge between Proteus and the Linux application.
-
----
 
 ## 10. User Database Format
 
@@ -504,12 +420,7 @@ Each user record contains six fields separated by `|`.
 CARD_ID|PIN|NAME|BALANCE|STATUS|FAILED_ATTEMPTS
 ```
 
-**Example:**
 
-```text
-12535708|1234|Demo User|7500.00|ACTIVE|0
-87654321|6789|Test User|2500.50|ACTIVE|0
-```
 
 ### Field Description
 
@@ -538,12 +449,6 @@ The application stores deposit and withdrawal records in `transactions.txt`.
 CARD_ID|TRANSACTION_TYPE|AMOUNT
 ```
 
-**Example:**
-
-```text
-12535708|Deposit|100.00
-12535708|Withdraw|200.00
-```
 
 The program appends new transaction records to the file.
 
@@ -553,22 +458,7 @@ The exact transaction order and supported transaction types depend on the Linux 
 
 ---
 
-## 12. Troubleshooting
 
-| Problem | Possible Solution |
-|---|---|
-| Serial port cannot open | Check the device path and permissions |
-| LCD displays incorrect text | Check LCD connections, contrast, and initialization |
-| PC not responding | Check UART0 TX/RX, baud rate, and serial connection |
-| RFID card not detected | Check RFID power, UART1 connections, and baud rate |
-| Card rejected | Verify the card ID in `users.txt` |
-| PIN always incorrect | Check the PIN in the database and keypad input |
-| Keypad keys incorrect | Check row/column connections and lookup table |
-| Transactions not saved | Check file permissions and working directory |
-| Multiple definition errors | Select only one firmware application file |
-| UART communication fails | Check clock configuration and message terminators |
-
----
 
 ## 13. Limitations and Security
 
@@ -607,7 +497,7 @@ Through this project, I gained practical experience in:
 
 ## 15. Author
 
-**Atish Vijay Udawant**
+**Dhanala Harsha Vardhan**
 
-This project was developed as an academic embedded systems project to understand microcontroller programming, serial communication, Linux C programming, and hardware-software integration.
+Embedded Systems| Firmware Development
 
