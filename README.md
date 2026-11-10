@@ -60,8 +60,6 @@ The LPC2148 handles the hardware and user interface, while the Linux PC applicat
 - User account management using text files.
 - Transaction history storage.
 
-**Note:** This project is developed for educational purposes.
-
 ---
 
 ## 2. System Architecture
@@ -223,13 +221,6 @@ UART1 is used to receive RFID card information.
 
 The firmware expects a framed card ID containing an 8-digit identifier. Different RFID readers may require changes to the receiving code.
 
-### Important Connection Notes
-
-- Connect common grounds where required.
-- Always cross TX and RX connections.
-- Never connect two TX pins together.
-- Verify the voltage levels of all devices.
-- Check the LPC2148 pin configuration and peripheral clock.
 
 ---
 
