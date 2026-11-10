@@ -460,7 +460,7 @@ The exact transaction order and supported transaction types depend on the Linux 
 
 
 
-## 13. Limitations and Security
+## 12. Limitations and Security
 
 - This project is developed for educational and demonstration purposes.
 - It does not connect to real banking servers.
@@ -473,7 +473,7 @@ The exact transaction order and supported transaction types depend on the Linux 
 
 ---
 
-## 14. Learning Outcomes
+## 13. Learning Outcomes
 
 Through this project, I gained practical experience in:
 
@@ -495,7 +495,7 @@ Through this project, I gained practical experience in:
 
 ---
 
-## 15. Author
+## 14. Author
 
 **Dhanala Harsha Vardhan**
 
