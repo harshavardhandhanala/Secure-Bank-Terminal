@@ -60,7 +60,7 @@ The LPC2148 handles the hardware and user interface, while the Linux PC applicat
 - User account management using text files.
 - Transaction history storage.
 
-**Note:** This project is developed for educational purposes. It does not connect to a real bank or dispense physical cash.
+**Note:** This project is developed for educational purposes.
 
 ---
 
@@ -180,8 +180,8 @@ The LCD uses an 8-bit data interface.
 ```text
   1    2    3    A
   4    5    6    B
-  7    8    9    *
-  C    0    =    E
+  7    8    9    C
+  *    0    #    E
 ```
 
 The numeric keys are used for PIN and amount entry. Other keys perform control operations such as backspace, confirmation, and exit.
@@ -201,9 +201,6 @@ Connect TX to RX and RX to TX between the two devices.
 **Communication Settings:**
 
 - Baud Rate: 9600
-- Data Bits: 8
-- Parity: None
-- Stop Bits: 1
 - Format: 8-N-1
 
 The baud-rate divisor must match the LPC2148 peripheral clock configuration.
@@ -298,7 +295,7 @@ The ATM menu contains two pages.
 | 4 | Next Menu / Previous Menu |
 | 5 | Mini-Statement |
 | 6 | PIN Change |
-| * | Exit Session |
+| # | Exit Session |
 | B | Backspace |
 | E | Confirm Input / Screen-specific Exit |
 
@@ -446,7 +443,6 @@ The project may also contain generated files such as `.hex`, `.axf`, `.o`, `.map
 
 ```bash
 ls /dev/ttyUSB*
-ls /dev/ttyACM*
 ```
 
 **Step 2: Open the Linux project directory**
