@@ -52,35 +52,18 @@ The project has two main parts:
 ### Block Diagram
 
 ```text
-          RFID Card
-              |
-              v
-         RFID Reader
-              |
-           UART1
-              |
-              v
-     +-------------------+
-     |      LPC2148      |
-     |                   |
-     |   4x4 Keypad      |
-     |   16x2 LCD        |
-     |   ATM Control     |
-     +-------------------+
-              |
-           UART0
-              |
-       MAX232 / USB-TTL
-              |
-              v
-     +-------------------+
-     |     Linux PC      |
-     |                   |
-     |    pc_main.c      |
-     |                   |
-     |    users.txt      |
-     | transactions.txt  |
-     +-------------------+
+         
+                                   +-------------------+
+                    Keypad  --->   |                   | ---> LCD Display
+                                   |                   |
+                                   |                   | ---> Buzzer
+                                   |                   |
+                                   |     LPC2148       |
+                                   |                   |      
+                                   |                   |          
+     RFID Card --> RFID Reader --> | UART1       UART0 | ---> MAX232  <---> PC Database
+                                   |                   |
+                                   +-------------------+
 ```
 
 ### Working of the Architecture
