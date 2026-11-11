@@ -61,7 +61,7 @@ The project has two main parts:
                                    |     LPC2148       |
                                    |                   |      
                                    |                   |          
-     RFID Card --> RFID Reader --> | UART1       UART0 | ---> MAX232  <---> PC Database
+     RFID Card --> RFID Reader --> | UART1       UART0 | <---> MAX232  <---> PC Database
                                    |                   |
                                    +-------------------+
 ```
